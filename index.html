@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Chat</title>
+</head>
+<body>
+    <h1>Upload PDF for Chat</h1>
+    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+        <label for="pdf">Upload PDF:</label>
+        <input type="file" id="pdf" name="pdf" accept="application/pdf" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <div id="chatSection" style="display:none;">
+        <h2>Ask a Question</h2>
+        <form id="chatForm" action="/chat" method="post">
+            <input type="hidden" id="pdfText" name="pdfText">
+            <label for="question">Question:</label>
+            <input type="text" id="question" name="question" required>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="response"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Pdf uploaded successfully') {
+                    document.getElementById('chatSection').style.display = 'block';
+                    document.getElementById('uploadForm').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('chatForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/chat', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').innerText = data.answer;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
